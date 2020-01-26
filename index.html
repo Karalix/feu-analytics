@@ -1,0 +1,918 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>kx-a</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.world.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+      }
+      
+
+      html {
+        margin: 0;
+        height: 100%;
+        background: linear-gradient(180deg, #FF9A03 0%, rgba(255, 154, 3, 0.38) 100%);
+        background-attachment: fixed;
+      }
+
+
+      h1 {
+        color: white;
+        position: fixed;
+      }
+      
+      #site-chooser {
+        position: fixed;
+        margin-top: 2.5em;
+      }
+      
+      h2 {
+        font-size: 2.2em;
+      }
+      
+      .row.fix-header {
+        position: fixed;
+        margin-top: 6.5em;
+        width: 80%;
+        max-width: 960px;
+      }
+      
+      .card-outside {
+        color: white;
+      }
+      
+      .today-number {
+        font-size: 2.2em;
+      }
+      
+      
+      .content {
+        background-color: white;
+        border-top-left-radius: 29px;
+        border-top-right-radius: 29px;
+        box-shadow: 0px 10px 50px rgba(0, 0, 0, 0.3);
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-top: 12.5em;
+      }
+      
+      .row {
+        margin: 20px;
+      }
+      
+      @media (max-width: 550px ) {
+        .content {
+          margin-top: 29em;
+        }
+      }
+      
+    </style>
+    <!-- import the webpage's javascript file -->
+    <script>var __KX_ID = 'dev-site' ; var __KX_URL = 'https://kx-a-f5279.firebaseio.com/'</script>
+    <script src="/script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <h1>
+            KX Analytics          
+          </h1>
+        </div>
+      </div>
+      <div class="row" id="site-chooser">
+        <div class="twelve columns">
+          <form>
+            <select name="sites" id="sites-select">
+              <option value="">Choose a site to analyze</option>
+            </select>
+          </form>
+        </div>
+      </div>
+      <div class="row first-content card-outside fix-header">
+        <div class="three columns">
+          <label>Today's sessions</label>
+          <div id="session-today" class="today-number">...</div>
+        </div>
+        <div class="three columns">
+          <label>Today's views</label>
+          <div id="view-today" class="today-number">...</div>
+        </div>
+        <div class="three columns">
+          <label>Today's CTA</label>
+          <div id="cta-today" class="today-number">...</div>
+        </div>
+        <div class="three columns">
+          <label>Total views</label>
+          <div id="views-total" class="today-number">...</div>
+        </div>
+      </div>
+    </div>
+    <div class="container content">
+      <div class="row">
+        <div class="twelve columns">
+          <h2>
+            Feu Analytics, free Firebase hosted analytics for your personal website.
+          </h2>
+          <p>
+            Visualize the most crucial data about your visitors. Without ever using nor storing any personnal information.<br/>
+            Host it yourself on a free <a href="https://firebase.google.com">Firebase</a> plan.
+          </p>
+          <p>
+            
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="six columns">
+          <h2>Page views</h2>
+          <canvas id="viewtimechart"></canvas>
+        </div>
+        <div class="six columns">
+          <h2>Page viewed</h2>
+          <canvas id="viewpagechart"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="six columns">
+          <h2>Sessions</h2>
+          <canvas id="sessiontimechart"></canvas>
+        </div>
+        <div class="six columns">
+          <h2>Referrers</h2>
+          <canvas id="referrerchart"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="six columns">
+          <h2>Mobile browsers</h2>
+          <canvas id="mobilechart"></canvas>
+        </div>
+        <div class="six columns">
+          <h2>Landing page</h2>
+          <canvas id="landingchart"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="twelve columns">
+          <h2>Country</h2>
+          <div id="map-container" style="position: relative; width: 100%; max-height: 300px;"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="six columns">
+          <h2>CTA evolution</h2>
+          <canvas id="ctatimechart"></canvas>
+        </div>
+        <div class="six columns">
+          <h2>CTA clicked</h2>
+          <canvas id="ctaclickchart"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="six columns">
+          <h2>Links clicked</h2>
+          <canvas id="linkclickchart"></canvas>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script>
+      let firebaseurlbase = 'https://kx-a-f5279.firebaseio.com'
+      let firebaseurl = ''
+      
+      fetch(`${firebaseurlbase}/.json?shallow=true`)
+      .then((resp) => {
+        return resp.json()
+      })
+      .then((json) => {
+        let firstDone = false
+        for (const key in json) {
+          let site = document.createElement('option')
+          site.setAttribute('value', key)
+          site.innerHTML = key
+          if (!firstDone) {
+            site.setAttribute('selected','')
+            firstDone = true
+            firebaseurl = firebaseurlbase + '/' + key
+            gatherData()
+          }
+          document.querySelector('#sites-select').append(site)
+        }
+      })
+      
+      document.querySelector('#sites-select').addEventListener('change', (event) => {
+        if (event.target.value.length > 0) {
+          firebaseurl = firebaseurlbase + '/' + event.target.value
+          gatherData()
+        }
+      })
+      
+      function gatherData () {
+      let viewtime = []
+      let viewpage = []
+      let viewtimedata = []
+      let viewpagedataset = []
+      let viewpagelabel = []
+      let viewMap = new Map()
+      let pageMap = new Map()
+      
+      fetch(`${firebaseurl}/view.json`)
+      .then((resp) => {
+        return resp.json()
+      })
+      .then((json) => {
+        for (const view in json) {
+          viewtime.push(json[view].openingTime)
+          viewpage.push(json[view].page)
+        }
+        
+        // Views per day
+        let todayViews = 0
+        let whiletime = moment(viewtime[0]).millisecond(0).second(0).minute(0).hour(0)
+        let whileindex = 0
+        while (whiletime < moment()) {
+          viewMap.set(whiletime.toISOString(), 0)
+          whiletime.add(1,'d')
+        }
+        
+        viewtime.map((point) => {
+          let timeValue = moment(point).millisecond(0).second(0).minute(0).hour(0).toISOString()
+          let yValue = viewMap.get(timeValue)
+          viewMap.set(timeValue, yValue+1)
+          if (timeValue == moment().millisecond(0).second(0).minute(0).hour(0).toISOString()) {
+            todayViews++
+          }
+        })
+        
+        document.querySelector('#view-today').innerHTML = todayViews
+        
+        for (const [k,v] of viewMap) {
+          viewtimedata.push({
+            x: moment(k),
+            y:v
+          })
+        }
+        
+        let viewtimectx = document.getElementById('viewtimechart').getContext('2d');
+        let viewtimegradient = viewtimectx.createLinearGradient(0, 0, 0, 150);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        viewtimegradient.addColorStop(0, 'rgba(255,154,3,0.6)');
+        viewtimegradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        viewtimegradient.addColorStop(1, 'transparent');
+        
+        let viewtimechart = new Chart(viewtimectx, {
+            // The type of chart we want to create
+            type: 'line',
+
+            data: {
+              datasets: [{
+                data: viewtimedata,
+                fill: 'origin',
+                backgroundColor: viewtimegradient,
+                borderColor:'#FF9A03',
+                pointRadius: 1,
+                label: 'Views'
+              }]
+            },
+            options: {
+              scales: {
+                xAxes: [{
+                  type: 'time',
+                  time: {
+                    unit: 'day'
+                  }
+                }],
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              },
+              legend: {
+                display: false
+              }
+            }
+
+        });
+          
+        
+        // Page viewed table
+        let totalViews = 0
+        for (const page of viewpage) {
+          totalViews++
+          if (!pageMap.has(page)) {
+            pageMap.set(page, 1)
+          } else {
+            pageMap.set(page, pageMap.get(page)+1)
+          }
+        }
+        
+        document.querySelector('#views-total').innerHTML = totalViews
+        
+        let viewpageorderingbuffer = []
+        for (const [k,v] of pageMap) {
+          viewpageorderingbuffer.push({page:k, v:v})
+        }
+        viewpageorderingbuffer = viewpageorderingbuffer.sort((a,b) => a.v < b.v)
+        for (const orderedviewpage of viewpageorderingbuffer) {
+          viewpagedataset.push(orderedviewpage.v)
+          viewpagelabel.push(orderedviewpage.page)
+        }
+        
+        let ctxviewpage = document.getElementById('viewpagechart').getContext('2d');
+        let viewpagegradient = ctxviewpage.createLinearGradient(0, 0, 250, 0);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        viewpagegradient.addColorStop(1, 'rgba(255,154,3,0.6)');
+        viewpagegradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        viewpagegradient.addColorStop(0, 'transparent');
+        
+        let viewpagechart = new Chart(ctxviewpage, {
+            // The type of chart we want to create
+            type: 'horizontalBar',
+            data: {
+              labels: viewpagelabel,
+              datasets: [{
+                data: viewpagedataset,
+                fill: 'origin',
+                backgroundColor: viewpagegradient,
+                borderColor:'#FF9A03',
+                label: 'page viewed'
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+
+        });
+        
+      })
+      
+      let sessiontime = []
+      let referrer = []
+      let mobile = []
+      let landingpage = []
+      let country=[]
+      
+      let sessiontimedata = []
+      let referrerdataset = []
+      let referrerlabel = []
+      let landingdata = []
+      let landinglabel= []
+      let sessiontimeMap = new Map()
+      let referrerMap = new Map()
+      let landingMap = new Map()
+      
+      fetch(`${firebaseurl}/session.json`)
+      .then((resp) => {
+        return resp.json()
+      })
+      .then((json) => {
+        for (const view in json) {
+          sessiontime.push(json[view].time)
+          referrer.push(json[view].referrer)
+          mobile.push(json[view].mobile)
+          landingpage.push(json[view].page)
+          if (json[view].country) {country.push(json[view].country)}
+        }
+        
+        // Sessions per day
+        let todaySession = 0
+        let whiletime = moment(sessiontime[0]).millisecond(0).second(0).minute(0).hour(0)
+        let whileindex = 0
+        while (whiletime < moment()) {
+          sessiontimeMap.set(whiletime.toISOString(), 0)
+          whiletime.add(1,'d')
+        }
+        
+        sessiontime.map((point) => {
+          let timeValue = moment(point).millisecond(0).second(0).minute(0).hour(0).toISOString()
+          let yValue = sessiontimeMap.get(timeValue)
+          sessiontimeMap.set(timeValue, yValue+1)
+          if (timeValue == moment().millisecond(0).second(0).minute(0).hour(0).toISOString()) {
+            todaySession++
+          }
+        })
+        
+        document.querySelector('#session-today').innerHTML = todaySession
+        
+        
+        for (const [k,v] of sessiontimeMap) {
+          sessiontimedata.push({
+            x: moment(k),
+            y:v
+          })
+        }
+        
+        let sessiontimectx = document.getElementById('sessiontimechart').getContext('2d');
+        let sessiontimegradient = sessiontimectx.createLinearGradient(0, 0, 0, 150);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        sessiontimegradient.addColorStop(0, 'rgba(255,154,3,0.6)');
+        sessiontimegradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        sessiontimegradient.addColorStop(1, 'transparent');
+        
+        let sessiontimechart = new Chart(sessiontimectx, {
+            // The type of chart we want to create
+            type: 'line',
+
+            data: {
+              datasets: [{
+                data: sessiontimedata,
+                fill: 'origin',
+                backgroundColor: sessiontimegradient,
+                borderColor:'#FF9A03',
+                pointRadius: 1,
+                label: 'Sessions'
+              }]
+            },
+            options: {
+              scales: {
+                xAxes: [{
+                  type: 'time',
+                  time: {
+                    unit: 'day'
+                  }
+                }],
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              },
+              legend: {
+                display: false
+              }
+            }
+
+        });
+          
+        
+        // Referrer table
+        for (const ref of referrer) {
+          let transformedref = ref
+          if (ref == '') {
+            transformedref = 'none'
+          } else if (new URL(ref)) {
+            transformedref = (new URL(ref)).hostname
+          }
+          if (!referrerMap.has(transformedref)) {
+            referrerMap.set(transformedref, 1)
+          } else {
+            referrerMap.set(transformedref, referrerMap.get(transformedref)+1)
+          }
+        }
+        
+        let referrerorderingbuffer = []
+        for (const [k,v] of referrerMap) {
+          referrerorderingbuffer.push({referrer:k, v:v})
+        }
+        referrerorderingbuffer = referrerorderingbuffer.sort((a,b) => a.v < b.v)
+        for (const orderedreferrer of referrerorderingbuffer) {
+          referrerdataset.push(orderedreferrer.v)
+          referrerlabel.push(orderedreferrer.referrer)
+        }
+        
+        let referrerctx = document.getElementById('referrerchart').getContext('2d');
+        let referrergradient = referrerctx.createLinearGradient(0, 0, 250, 0);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        referrergradient.addColorStop(1, 'rgba(255,154,3,0.6)');
+        referrergradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        referrergradient.addColorStop(0, 'transparent');
+        
+        let referrerchart = new Chart(referrerctx, {
+            // The type of chart we want to create
+            type: 'horizontalBar',
+            data: {
+              labels: referrerlabel,
+              datasets: [{
+                data: referrerdataset,
+                fill: 'origin',
+                backgroundColor: referrergradient,
+                borderColor:'#FF9A03',
+                label: 'referrings'
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+
+        });
+        
+        // Mobile table
+        let nbMobile = 0
+        let nbNonMobile = 0
+        for (const ref of mobile) {
+          ref ? nbMobile++ : nbNonMobile++
+        }
+        
+        let mobilectx = document.getElementById('mobilechart').getContext('2d');
+        let mobilegradient = mobilectx.createLinearGradient(0, 0, 250, 0);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        mobilegradient.addColorStop(1, 'rgba(255,154,3,0.6)');
+        mobilegradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        mobilegradient.addColorStop(0, 'transparent');
+        
+        let mobilechart = new Chart(mobilectx, {
+            // The type of chart we want to create
+            type: 'horizontalBar',
+            data: {
+              labels: ['mobile', 'desktop'],
+              datasets: [{
+                data: [nbMobile, nbNonMobile],
+                fill: 'origin',
+                backgroundColor: mobilegradient,
+                borderColor:'#FF9A03',
+                label: 'devices'
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+
+        });
+        
+        // Landing page table
+        for (const page of landingpage) {
+          if (!landingMap.has(page)) {
+            landingMap.set(page, 1)
+          } else {
+            landingMap.set(page, landingMap.get(page)+1)
+          }
+        }
+        
+        let landingorderingbuffer = []
+        for (const [k,v] of landingMap) {
+          landingorderingbuffer.push({page:k, v:v})
+        }
+        landingorderingbuffer = landingorderingbuffer.sort((a,b) => a.v < b.v)
+        for (const orderedlanding of landingorderingbuffer) {
+          landingdata.push(orderedlanding.v)
+          landinglabel.push(orderedlanding.page)
+        }
+        
+        let landingctx = document.getElementById('landingchart').getContext('2d');
+        let landinggradient = landingctx.createLinearGradient(0, 0, 250, 0);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        landinggradient.addColorStop(1, 'rgba(255,154,3,0.6)');
+        landinggradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        landinggradient.addColorStop(0, 'transparent');
+        
+        let landingchart = new Chart(landingctx, {
+            // The type of chart we want to create
+            type: 'horizontalBar',
+            data: {
+              labels: landinglabel,
+              datasets: [{
+                data: landingdata,
+                fill: 'origin',
+                backgroundColor: landinggradient,
+                borderColor:'#FF9A03',
+                label: 'landing'
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+
+        });
+        
+        // Country map
+        let series = []
+        let countryMap = new Map()
+        var countryISOMapping = {
+          AF: 'AFG',  AX: 'ALA',  AL: 'ALB',  DZ: 'DZA',  AS: 'ASM',  AD: 'AND',  AO: 'AGO',  AI: 'AIA',  AQ: 'ATA',  AG: 'ATG',  AR: 'ARG',  AM: 'ARM',  AW: 'ABW',  AU: 'AUS',  AT: 'AUT',  AZ: 'AZE',  BS: 'BHS',  BH: 'BHR',  BD: 'BGD',  BB: 'BRB',  BY: 'BLR',  BE: 'BEL',  BZ: 'BLZ',  BJ: 'BEN',  BM: 'BMU',  BT: 'BTN',  BO: 'BOL',  BA: 'BIH',  BW: 'BWA',  BV: 'BVT',  BR: 'BRA',  VG: 'VGB',  IO: 'IOT',  BN: 'BRN',  BG: 'BGR',  BF: 'BFA',  BI: 'BDI',  KH: 'KHM',  CM: 'CMR',  CA: 'CAN',  CV: 'CPV',  KY: 'CYM',  CF: 'CAF',  TD: 'TCD',  CL: 'CHL',  CN: 'CHN',  HK: 'HKG',  MO: 'MAC',  CX: 'CXR',  CC: 'CCK',  CO: 'COL',  KM: 'COM',  CG: 'COG',  CD: 'COD',  CK: 'COK',  CR: 'CRI',  CI: 'CIV',  HR: 'HRV',  CU: 'CUB',  CY: 'CYP',  CZ: 'CZE',  DK: 'DNK',  DJ: 'DJI',  DM: 'DMA',  DO: 'DOM',  EC: 'ECU',  EG: 'EGY',  SV: 'SLV',  GQ: 'GNQ',  ER: 'ERI',  EE: 'EST',  ET: 'ETH',  FK: 'FLK',  FO: 'FRO',  FJ: 'FJI',  FI: 'FIN',  FR: 'FRA',  GF: 'GUF',  PF: 'PYF',  TF: 'ATF',  GA: 'GAB',  GM: 'GMB',  GE: 'GEO',  DE: 'DEU',  GH: 'GHA',  GI: 'GIB',  GR: 'GRC',  GL: 'GRL',  GD: 'GRD',  GP: 'GLP',  GU: 'GUM',  GT: 'GTM',  GG: 'GGY',  GN: 'GIN',  GW: 'GNB',  GY: 'GUY',  HT: 'HTI',  HM: 'HMD',  VA: 'VAT',  HN: 'HND',  HU: 'HUN',  IS: 'ISL',  IN: 'IND',  ID: 'IDN',  IR: 'IRN',  IQ: 'IRQ',  IE: 'IRL',  IM: 'IMN',  IL: 'ISR',  IT: 'ITA',  JM: 'JAM',  JP: 'JPN',  JE: 'JEY',  JO: 'JOR',  KZ: 'KAZ',  KE: 'KEN',  KI: 'KIR',  KP: 'PRK',  KR: 'KOR',  KW: 'KWT',  KG: 'KGZ',  LA: 'LAO',  LV: 'LVA',  LB: 'LBN',  LS: 'LSO',  LR: 'LBR',  LY: 'LBY',  LI: 'LIE',  LT: 'LTU',  LU: 'LUX',  MK: 'MKD',  MG: 'MDG',  MW: 'MWI',  MY: 'MYS',  MV: 'MDV',  ML: 'MLI',  MT: 'MLT',  MH: 'MHL',  MQ: 'MTQ',  MR: 'MRT',  MU: 'MUS',  YT: 'MYT',  MX: 'MEX',  FM: 'FSM',  MD: 'MDA',  MC: 'MCO', MN: 'MNG',  ME: 'MNE',  MS: 'MSR',  MA: 'MAR',  MZ: 'MOZ',  MM: 'MMR',  NA: 'NAM',  NR: 'NRU',  NP: 'NPL',  NL: 'NLD',  AN: 'ANT',  NC: 'NCL',  NZ: 'NZL',  NI: 'NIC',  NE: 'NER',  NG: 'NGA',  NU: 'NIU',  NF: 'NFK',  MP: 'MNP',  NO: 'NOR',  OM: 'OMN',  PK: 'PAK',  PW: 'PLW',  PS: 'PSE',  PA: 'PAN',  PG: 'PNG',  PY: 'PRY',  PE: 'PER',  PH: 'PHL',  PN: 'PCN',  PL: 'POL',  PT: 'PRT',  PR: 'PRI',  QA: 'QAT',  RE: 'REU',  RO: 'ROU',  RU: 'RUS',  RW: 'RWA',  BL: 'BLM',  SH: 'SHN',  KN: 'KNA',  LC: 'LCA',  MF: 'MAF',  PM: 'SPM',  VC: 'VCT',  WS: 'WSM',  SM: 'SMR',  ST: 'STP',  SA: 'SAU',  SN: 'SEN',  RS: 'SRB',  SC: 'SYC',  SL: 'SLE',  SG: 'SGP',  SK: 'SVK',  SI: 'SVN',  SB: 'SLB',  SO: 'SOM',  ZA: 'ZAF',  GS: 'SGS',  SS: 'SSD',  ES: 'ESP',  LK: 'LKA',  SD: 'SDN',  SR: 'SUR',  SJ: 'SJM',  SZ: 'SWZ',  SE: 'SWE',  CH: 'CHE',  SY: 'SYR',  TW: 'TWN',  TJ: 'TJK',  TZ: 'TZA',  TH: 'THA',  TL: 'TLS',  TG: 'TGO',  TK: 'TKL',  TO: 'TON',  TT: 'TTO',  TN: 'TUN',  TR: 'TUR',  TM: 'TKM',  TC: 'TCA',  TV: 'TUV',  UG: 'UGA',  UA: 'UKR',  AE: 'ARE',  GB: 'GBR',  US: 'USA',  UM: 'UMI',  UY: 'URY',  UZ: 'UZB',  VU: 'VUT',  VE: 'VEN',  VN: 'VNM',  VI: 'VIR',  WF: 'WLF',  EH: 'ESH',  YE: 'YEM',  ZM: 'ZMB',  ZW: 'ZWE',  XK: 'XKX'
+        }
+        for (const ctry of country) {
+          if (countryMap.get(ctry)) {
+            countryMap.set(ctry, countryMap.get(ctry)+1)
+          } else {
+            countryMap.set(ctry, 1)
+          }
+        }
+        
+        for (const [k,v] of countryMap) {
+          series.push([countryISOMapping[k],v])
+        }
+        
+        // Datamaps expect data in format:
+        // { "USA": { "fillColor": "#42a844", numberOfWhatever: 75},
+        //   "FRA": { "fillColor": "#8dc386", numberOfWhatever: 43 } }
+        var dataset = {};
+
+        // We need to colorize every country based on "numberOfWhatever"
+        // colors should be uniq for every value.
+        // For this purpose we create palette(using min/max series-value)
+        var onlyValues = series.map(function(obj){ return obj[1]; });
+        var minValue = Math.min.apply(null, onlyValues),
+                maxValue = Math.max.apply(null, onlyValues);
+
+        // create color palette function
+        // color can be whatever you wish
+        var paletteScale = d3.scale.linear()
+                .domain([minValue,maxValue])
+                .range(["#FDF8F0","#FF9A03"]);
+
+        // fill dataset in appropriate format
+        series.forEach(function(item){ //
+            // item example value ["USA", 70]
+            var iso = item[0],
+                    value = item[1];
+            dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
+        });
+
+        // render map
+        new Datamap({
+            responsive: true,
+            element: document.getElementById('map-container'),
+            projection: 'mercator', // big world map
+            // countries don't listed in dataset will be painted with this color
+            fills: { defaultFill: '#FFFFFF' },
+            data: dataset,
+            geographyConfig: {
+                borderColor: '#DEDEDE',
+                highlightBorderWidth: 2,
+                // don't change color on mouse hover
+                highlightFillColor: function(geo) {
+                    return geo['fillColor'] || '#F5F5F5';
+                },
+                // only change border
+                highlightBorderColor: '#B7B7B7',
+                // show desired information in tooltip
+                popupTemplate: function(geo, data) {
+                    // don't show tooltip if country don't present in dataset
+                    if (!data) { return ; }
+                    // tooltip content
+                    return ['<div class="hoverinfo">',
+                        '<strong>', geo.properties.name, '</strong>',
+                        '<br>Sessions: <strong>', data.numberOfThings, '</strong>',
+                        '</div>'].join('');
+                }
+            }
+        });
+        
+        
+      })
+      
+      let linkclick = []
+      let ctaclick = []
+      let ctatimeclick = []
+      
+      let linkclickdata = []
+      let ctaclickdata = []
+      let ctatimeclickdata = []
+      
+      let linkclicklabel = []
+      let ctaclicklabel= []
+      
+      let linkclickMap = new Map()
+      let ctaclickMap = new Map()
+      let ctatimeclickMap = new Map()
+      
+      fetch(`${firebaseurl}/click.json`)
+      .then((resp) => {
+        return resp.json()
+      })
+      .then((json) => {
+        for (const view in json) {
+          if (!json[view].cta) linkclick.push(json[view].target)
+          else {
+            ctaclick.push(json[view].target)
+            ctatimeclick.push(json[view].time)
+          }
+        }
+        
+        // Cta per day
+        let todayCta= 0
+        let whiletime = moment(ctatimeclick[0]).millisecond(0).second(0).minute(0).hour(0)
+        let whileindex = 0
+        while (whiletime < moment()) {
+          ctatimeclickMap.set(whiletime.toISOString(), 0)
+          whiletime.add(1,'d')
+        }
+        
+        ctatimeclick.map((point) => {
+          let timeValue = moment(point).millisecond(0).second(0).minute(0).hour(0).toISOString()
+          let yValue = ctatimeclickMap.get(timeValue)
+          ctatimeclickMap.set(timeValue, yValue+1)
+          if (timeValue == moment().millisecond(0).second(0).minute(0).hour(0).toISOString()) {
+            todayCta++
+          }
+        })
+        
+        document.querySelector('#cta-today').innerHTML = todayCta
+        
+        
+        for (const [k,v] of ctatimeclickMap) {
+          ctatimeclickdata.push({
+            x: moment(k),
+            y:v
+          })
+        }
+        
+        let ctatimectx = document.getElementById('ctatimechart').getContext('2d');
+        let ctatimegradient = ctatimectx.createLinearGradient(0, 0, 0, 150);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        ctatimegradient.addColorStop(0, 'rgba(255,154,3,0.6)');
+        ctatimegradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        ctatimegradient.addColorStop(1, 'transparent');
+        
+        let ctatimechart = new Chart(ctatimectx, {
+            // The type of chart we want to create
+            type: 'line',
+
+            data: {
+              datasets: [{
+                data: ctatimeclickdata,
+                fill: 'origin',
+                backgroundColor: ctatimegradient,
+                borderColor:'#FF9A03',
+                pointRadius: 1,
+                label: 'CTA'
+              }]
+            },
+            options: {
+              scales: {
+                xAxes: [{
+                  type: 'time',
+                  time: {
+                    unit: 'day'
+                  }
+                }],
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              },
+              legend: {
+                display: false
+              }
+            }
+
+        });
+        
+        // CTA click table
+        for (const page of ctaclick) {
+          if (!ctaclickMap.has(page)) {
+            ctaclickMap.set(page, 1)
+          } else {
+            ctaclickMap.set(page, ctaclickMap.get(page)+1)
+          }
+        }
+        
+        let ctaclickorderingbuffer = []
+        for (const [k,v] of ctaclickMap) {
+          ctaclickorderingbuffer.push({target:k, v:v})
+        }
+        ctaclickorderingbuffer = ctaclickorderingbuffer.sort((a,b) => a.v < b.v)
+        for (const orderedctaclick of ctaclickorderingbuffer) {
+          ctaclickdata.push(orderedctaclick.v)
+          ctaclicklabel.push(orderedctaclick.target)
+        }
+        
+        let ctaclickctx = document.getElementById('ctaclickchart').getContext('2d');
+        let ctaclickgradient = ctaclickctx.createLinearGradient(0, 0, 250, 0);
+        
+        //gradient.addColorStop(0, '#FF9A03');
+        ctaclickgradient.addColorStop(1, 'rgba(255,154,3,0.6)');
+        ctaclickgradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        ctaclickgradient.addColorStop(0, 'transparent');
+        
+        let ctaclickchart = new Chart(ctaclickctx, {
+            // The type of chart we want to create
+            type: 'horizontalBar',
+            data: {
+              labels: ctaclicklabel,
+              datasets: [{
+                data: ctaclickdata,
+                fill: 'origin',
+                backgroundColor: ctaclickgradient,
+                borderColor:'#FF9A03',
+                label: 'clicks'
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+
+        });
+        
+        // Link click table
+        for (const page of linkclick) {
+          if (!linkclickMap.has(page)) {
+            linkclickMap.set(page, 1)
+          } else {
+            linkclickMap.set(page, linkclickMap.get(page)+1)
+          }
+        }
+        
+        let linkclickorderingbuffer = []
+        for (const [k,v] of linkclickMap) {
+          linkclickorderingbuffer.push({target:k, v:v})
+        }
+        linkclickorderingbuffer = linkclickorderingbuffer.sort((a,b) => a.v < b.v)
+        for (const orderedlinkclick of linkclickorderingbuffer) {
+          linkclickdata.push(orderedlinkclick.v)
+          linkclicklabel.push(orderedlinkclick.target)
+        }
+        
+        let linkclickctx = document.getElementById('linkclickchart').getContext('2d');
+        let linkclickgradient = linkclickctx.createLinearGradient(0, 0, 250, 0);
+        
+        linkclickgradient.addColorStop(1, 'rgba(255,154,3,0.6)');
+        linkclickgradient.addColorStop(0.7, 'rgba(255,154,3,0.4)');
+        linkclickgradient.addColorStop(0, 'transparent');
+        
+        let linkclickchart = new Chart(linkclickctx, {
+            // The type of chart we want to create
+            type: 'horizontalBar',
+            data: {
+              labels: linkclicklabel,
+              datasets: [{
+                data: linkclickdata,
+                fill: 'origin',
+                backgroundColor: linkclickgradient,
+                borderColor:'#FF9A03',
+                label: 'clicks'
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                xAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+
+        });
+      })
+    }
+    </script>
+  </body>
+</html>
