@@ -653,7 +653,7 @@
                     value = item[1];
             dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
         });
-
+        document.getElementById('map-container').innerHTML = ''
         // render map
         new Datamap({
             responsive: true,

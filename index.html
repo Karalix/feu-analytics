@@ -260,6 +260,7 @@
         }
         
         let viewtimectx = document.getElementById('viewtimechart').getContext('2d');
+        viewtimectx.clearRect(0, 0, viewtimectx.width, viewtimectx.height)
         let viewtimegradient = viewtimectx.createLinearGradient(0, 0, 0, 150);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -327,6 +328,7 @@
         }
         
         let ctxviewpage = document.getElementById('viewpagechart').getContext('2d');
+        ctxviewpage.clearRect(0, 0, ctxviewpage.width, ctxviewpage.height)
         let viewpagegradient = ctxviewpage.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -421,6 +423,7 @@
         }
         
         let sessiontimectx = document.getElementById('sessiontimechart').getContext('2d');
+        sessiontimectx.clearRect(0, 0, sessiontimectx.width, sessiontimectx.height)
         let sessiontimegradient = sessiontimectx.createLinearGradient(0, 0, 0, 150);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -490,6 +493,7 @@
         }
         
         let referrerctx = document.getElementById('referrerchart').getContext('2d');
+        referrerctx.clearRect(0, 0, referrerctx.width, referrerctx.height)
         let referrergradient = referrerctx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -533,6 +537,7 @@
         }
         
         let mobilectx = document.getElementById('mobilechart').getContext('2d');
+        mobilectx.clearRect(0, 0, mobilectx.width, mobilectx.height)
         let mobilegradient = mobilectx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -588,6 +593,7 @@
         }
         
         let landingctx = document.getElementById('landingchart').getContext('2d');
+        landingctx.clearRect(0, 0, landingctx.width, landingctx.height)
         let landinggradient = landingctx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -667,6 +673,7 @@
             dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
         });
 
+        document.getElementById('map-container').innerHTML = ''
         // render map
         new Datamap({
             responsive: true,
@@ -757,6 +764,7 @@
         }
         
         let ctatimectx = document.getElementById('ctatimechart').getContext('2d');
+        ctatimectx.clearRect(0, 0, ctatimectx.width, ctatimectx.height)
         let ctatimegradient = ctatimectx.createLinearGradient(0, 0, 0, 150);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -819,6 +827,7 @@
         }
         
         let ctaclickctx = document.getElementById('ctaclickchart').getContext('2d');
+        ctaclickctx.clearRect(0, 0, ctaclickctx.width, ctaclickctx.height)
         let ctaclickgradient = ctaclickctx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -874,6 +883,7 @@
         }
         
         let linkclickctx = document.getElementById('linkclickchart').getContext('2d');
+        linkclickctx.clearRect(0, 0, linkclickctx.width, linkclickctx.height)
         let linkclickgradient = linkclickctx.createLinearGradient(0, 0, 250, 0);
         
         linkclickgradient.addColorStop(1, 'rgba(255,154,3,0.6)');
