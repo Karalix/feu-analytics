@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.world.min.js"></script>
+    <script>var __KX_ID = 'dev-site' ; var __KX_URL = 'https://kx-a-f5279.firebaseio.com/'</script>
+    <script src="https://cdn.jsdelivr.net/gh/Karalix/feu-analytics/feu-analytics-min.js" defer></script>
     <style>
       body {
         margin: 0;
@@ -76,15 +77,13 @@
       
     </style>
     <!-- import the webpage's javascript file -->
-    <script>var __KX_ID = 'dev-site' ; var __KX_URL = 'https://kx-a-f5279.firebaseio.com/'</script>
-    <script src="/script.js" defer></script>
   </head>
   <body>
     <div class="container">
       <div class="row">
         <div class="twelve columns">
           <h1>
-            Feu Analytics 🔥     
+            Feu Analytics 🔥 
           </h1>
         </div>
       </div>
@@ -119,13 +118,13 @@
     <div class="container content">
       <div class="row">
         <div class="twelve columns">
-          <h2>
-            Feu Analytics, free Firebase hosted analytics for your personal website.
-          </h2>
-          <h3>
-            You want the same for your website ? Go there: <a href="https://github.com/Karalix/feu-analytics">https://github.com/Karalix/feu-analytics</a>
-          </h3>
-        </div>
+            <h2>
+              Feu Analytics, free Firebase hosted analytics for your personal website.
+            </h2>
+            <h3>
+              You want the same for your website ? Go there: <a href="https://github.com/Karalix/feu-analytics">https://github.com/Karalix/feu-analytics</a>
+            </h3>
+          </div>
       </div>
       <div class="row">
         <div class="six columns">
@@ -186,6 +185,9 @@
       let firebaseurlbase = 'https://kx-a-f5279.firebaseio.com'
       let firebaseurl = ''
       
+      let charts = []
+      let datamap = null
+      
       fetch(`${firebaseurlbase}/.json?shallow=true`)
       .then((resp) => {
         return resp.json()
@@ -221,6 +223,14 @@
       let viewpagelabel = []
       let viewMap = new Map()
       let pageMap = new Map()
+      
+      for (const chart of charts) {
+        chart.destroy()
+      }
+      chart = []
+      if (datamap) {
+        console.log(datamap)
+      }
       
       fetch(`${firebaseurl}/view.json`)
       .then((resp) => {
@@ -260,7 +270,6 @@
         }
         
         let viewtimectx = document.getElementById('viewtimechart').getContext('2d');
-        viewtimectx.clearRect(0, 0, viewtimectx.width, viewtimectx.height)
         let viewtimegradient = viewtimectx.createLinearGradient(0, 0, 0, 150);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -302,6 +311,8 @@
             }
 
         });
+        
+        charts.push(viewtimechart)
           
         
         // Page viewed table
@@ -328,7 +339,6 @@
         }
         
         let ctxviewpage = document.getElementById('viewpagechart').getContext('2d');
-        ctxviewpage.clearRect(0, 0, ctxviewpage.width, ctxviewpage.height)
         let viewpagegradient = ctxviewpage.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -365,6 +375,8 @@
         });
         
       })
+        
+      charts.push(viewpagechart)
       
       let sessiontime = []
       let referrer = []
@@ -423,7 +435,6 @@
         }
         
         let sessiontimectx = document.getElementById('sessiontimechart').getContext('2d');
-        sessiontimectx.clearRect(0, 0, sessiontimectx.width, sessiontimectx.height)
         let sessiontimegradient = sessiontimectx.createLinearGradient(0, 0, 0, 150);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -465,6 +476,8 @@
             }
 
         });
+        
+        charts.push(sessiontimechart)
           
         
         // Referrer table
@@ -493,7 +506,6 @@
         }
         
         let referrerctx = document.getElementById('referrerchart').getContext('2d');
-        referrerctx.clearRect(0, 0, referrerctx.width, referrerctx.height)
         let referrergradient = referrerctx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -529,6 +541,8 @@
 
         });
         
+        charts.push(referrerchart)
+        
         // Mobile table
         let nbMobile = 0
         let nbNonMobile = 0
@@ -537,7 +551,6 @@
         }
         
         let mobilectx = document.getElementById('mobilechart').getContext('2d');
-        mobilectx.clearRect(0, 0, mobilectx.width, mobilectx.height)
         let mobilegradient = mobilectx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -573,6 +586,8 @@
 
         });
         
+        charts.push(mobilechart)
+        
         // Landing page table
         for (const page of landingpage) {
           if (!landingMap.has(page)) {
@@ -593,7 +608,6 @@
         }
         
         let landingctx = document.getElementById('landingchart').getContext('2d');
-        landingctx.clearRect(0, 0, landingctx.width, landingctx.height)
         let landinggradient = landingctx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -628,6 +642,8 @@
             }
 
         });
+        
+        charts.push(landingchart)
         
         // Country map
         let series = []
@@ -672,7 +688,6 @@
                     value = item[1];
             dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
         });
-
         document.getElementById('map-container').innerHTML = ''
         // render map
         new Datamap({
@@ -764,7 +779,6 @@
         }
         
         let ctatimectx = document.getElementById('ctatimechart').getContext('2d');
-        ctatimectx.clearRect(0, 0, ctatimectx.width, ctatimectx.height)
         let ctatimegradient = ctatimectx.createLinearGradient(0, 0, 0, 150);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -807,6 +821,8 @@
 
         });
         
+        charts.push(ctatimechart)
+        
         // CTA click table
         for (const page of ctaclick) {
           if (!ctaclickMap.has(page)) {
@@ -827,7 +843,6 @@
         }
         
         let ctaclickctx = document.getElementById('ctaclickchart').getContext('2d');
-        ctaclickctx.clearRect(0, 0, ctaclickctx.width, ctaclickctx.height)
         let ctaclickgradient = ctaclickctx.createLinearGradient(0, 0, 250, 0);
         
         //gradient.addColorStop(0, '#FF9A03');
@@ -863,6 +878,8 @@
 
         });
         
+        charts.push(ctaclickchart)
+        
         // Link click table
         for (const page of linkclick) {
           if (!linkclickMap.has(page)) {
@@ -883,7 +900,6 @@
         }
         
         let linkclickctx = document.getElementById('linkclickchart').getContext('2d');
-        linkclickctx.clearRect(0, 0, linkclickctx.width, linkclickctx.height)
         let linkclickgradient = linkclickctx.createLinearGradient(0, 0, 250, 0);
         
         linkclickgradient.addColorStop(1, 'rgba(255,154,3,0.6)');
@@ -917,8 +933,11 @@
             }
 
         });
+        
+        charts.push(linkclickchart)
       })
     }
     </script>
   </body>
 </html>
+    

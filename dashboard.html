@@ -173,6 +173,9 @@
       let firebaseurlbase = 'https://kx-a-f5279.firebaseio.com'
       let firebaseurl = ''
       
+      let charts = []
+      let datamap = null
+      
       fetch(`${firebaseurlbase}/.json?shallow=true`)
       .then((resp) => {
         return resp.json()
@@ -208,6 +211,15 @@
       let viewpagelabel = []
       let viewMap = new Map()
       let pageMap = new Map()
+      
+      console.log(charts)
+      for (const chart of charts) {
+        chart.destroy()
+      }
+      charts = []
+      if (datamap) {
+        console.log(datamap)
+      }
       
       fetch(`${firebaseurl}/view.json`)
       .then((resp) => {
@@ -288,6 +300,8 @@
             }
 
         });
+        
+        charts.push(viewtimechart)
           
         
         // Page viewed table
@@ -348,8 +362,10 @@
             }
 
         });
+      charts.push(viewpagechart)
         
       })
+        
       
       let sessiontime = []
       let referrer = []
@@ -449,6 +465,8 @@
             }
 
         });
+        
+        charts.push(sessiontimechart)
           
         
         // Referrer table
@@ -512,6 +530,8 @@
 
         });
         
+        charts.push(referrerchart)
+        
         // Mobile table
         let nbMobile = 0
         let nbNonMobile = 0
@@ -554,6 +574,8 @@
             }
 
         });
+        
+        charts.push(mobilechart)
         
         // Landing page table
         for (const page of landingpage) {
@@ -610,6 +632,8 @@
 
         });
         
+        charts.push(landingchart)
+        
         // Country map
         let series = []
         let countryMap = new Map()
@@ -655,7 +679,7 @@
         });
         document.getElementById('map-container').innerHTML = ''
         // render map
-        new Datamap({
+        datamap = new Datamap({
             responsive: true,
             element: document.getElementById('map-container'),
             projection: 'mercator', // big world map
@@ -786,6 +810,8 @@
 
         });
         
+        charts.push(ctatimechart)
+        
         // CTA click table
         for (const page of ctaclick) {
           if (!ctaclickMap.has(page)) {
@@ -841,6 +867,8 @@
 
         });
         
+        charts.push(ctaclickchart)
+        
         // Link click table
         for (const page of linkclick) {
           if (!linkclickMap.has(page)) {
@@ -894,6 +922,8 @@
             }
 
         });
+        
+        charts.push(linkclickchart)
       })
     }
     </script>
