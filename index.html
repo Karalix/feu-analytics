@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.world.min.js"></script>
+    <script>var __KX_ID = 'dev-site' ; var __KX_URL = 'https://kx-a-f5279.firebaseio.com/'</script>
+    <script src="https://cdn.jsdelivr.net/gh/Karalix/feu-analytics/feu-analytics-min.js" defer></script>
     <style>
       body {
         margin: 0;
@@ -76,15 +77,13 @@
       
     </style>
     <!-- import the webpage's javascript file -->
-    <script>var __KX_ID = 'dev-site' ; var __KX_URL = 'https://kx-a-f5279.firebaseio.com/'</script>
-    <script src="/script.js" defer></script>
   </head>
   <body>
     <div class="container">
       <div class="row">
         <div class="twelve columns">
           <h1>
-            Feu Analytics 🔥     
+            Feu Analytics 🔥 
           </h1>
         </div>
       </div>
@@ -119,13 +118,13 @@
     <div class="container content">
       <div class="row">
         <div class="twelve columns">
-          <h2>
-            Feu Analytics, free Firebase hosted analytics for your personal website.
-          </h2>
-          <h3>
-            You want the same for your website ? Go there: <a href="https://github.com/Karalix/feu-analytics">https://github.com/Karalix/feu-analytics</a>
-          </h3>
-        </div>
+            <h2>
+              Feu Analytics, free Firebase hosted analytics for your personal website.
+            </h2>
+            <h3>
+              You want the same for your website ? Go there: <a href="https://github.com/Karalix/feu-analytics">https://github.com/Karalix/feu-analytics</a>
+            </h3>
+          </div>
       </div>
       <div class="row">
         <div class="six columns">
@@ -186,6 +185,9 @@
       let firebaseurlbase = 'https://kx-a-f5279.firebaseio.com'
       let firebaseurl = ''
       
+      let charts = []
+      let datamap = null
+      
       fetch(`${firebaseurlbase}/.json?shallow=true`)
       .then((resp) => {
         return resp.json()
@@ -221,6 +223,14 @@
       let viewpagelabel = []
       let viewMap = new Map()
       let pageMap = new Map()
+      
+      for (const chart of charts) {
+        chart.destroy()
+      }
+      chart = []
+      if (datamap) {
+        console.log(datamap)
+      }
       
       fetch(`${firebaseurl}/view.json`)
       .then((resp) => {
@@ -301,6 +311,8 @@
             }
 
         });
+        
+        charts.push(viewtimechart)
           
         
         // Page viewed table
@@ -363,6 +375,8 @@
         });
         
       })
+        
+      charts.push(viewpagechart)
       
       let sessiontime = []
       let referrer = []
@@ -462,6 +476,8 @@
             }
 
         });
+        
+        charts.push(sessiontimechart)
           
         
         // Referrer table
@@ -525,6 +541,8 @@
 
         });
         
+        charts.push(referrerchart)
+        
         // Mobile table
         let nbMobile = 0
         let nbNonMobile = 0
@@ -567,6 +585,8 @@
             }
 
         });
+        
+        charts.push(mobilechart)
         
         // Landing page table
         for (const page of landingpage) {
@@ -623,6 +643,8 @@
 
         });
         
+        charts.push(landingchart)
+        
         // Country map
         let series = []
         let countryMap = new Map()
@@ -666,7 +688,7 @@
                     value = item[1];
             dataset[iso] = { numberOfThings: value, fillColor: paletteScale(value) };
         });
-
+        document.getElementById('map-container').innerHTML = ''
         // render map
         new Datamap({
             responsive: true,
@@ -799,6 +821,8 @@
 
         });
         
+        charts.push(ctatimechart)
+        
         // CTA click table
         for (const page of ctaclick) {
           if (!ctaclickMap.has(page)) {
@@ -854,6 +878,8 @@
 
         });
         
+        charts.push(ctaclickchart)
+        
         // Link click table
         for (const page of linkclick) {
           if (!linkclickMap.has(page)) {
@@ -907,8 +933,11 @@
             }
 
         });
+        
+        charts.push(linkclickchart)
       })
     }
     </script>
   </body>
 </html>
+    

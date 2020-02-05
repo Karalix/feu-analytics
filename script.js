@@ -35,7 +35,8 @@ viewObj.closingTime = (new Date()).toISOString()
 viewObj.sessionId = sessionId
 viewObj.page = window.location.pathname
 
-window.addEventListener('unload', logView, false)
+logView()
+
 window.addEventListener('click', logClick, false)
 
 function logView () {
