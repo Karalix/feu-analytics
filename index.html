@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -118,12 +120,12 @@
     <div class="container content">
       <div class="row">
         <div class="twelve columns">
-            <h2>
+            <p>
               Feu Analytics, free Firebase hosted analytics for your personal website.
-            </h2>
-            <h3>
+            </p>
+            <p>
               You want the same for your website ? Go there: <a href="https://github.com/Karalix/feu-analytics">https://github.com/Karalix/feu-analytics</a>
-            </h3>
+            </p>
           </div>
       </div>
       <div class="row">
@@ -224,10 +226,11 @@
       let viewMap = new Map()
       let pageMap = new Map()
       
+      console.log(charts)
       for (const chart of charts) {
         chart.destroy()
       }
-      chart = []
+      charts = []
       if (datamap) {
         console.log(datamap)
       }
@@ -373,10 +376,10 @@
             }
 
         });
+      charts.push(viewpagechart)
         
       })
         
-      charts.push(viewpagechart)
       
       let sessiontime = []
       let referrer = []
@@ -690,7 +693,7 @@
         });
         document.getElementById('map-container').innerHTML = ''
         // render map
-        new Datamap({
+        datamap = new Datamap({
             responsive: true,
             element: document.getElementById('map-container'),
             projection: 'mercator', // big world map
@@ -940,4 +943,3 @@
     </script>
   </body>
 </html>
-    
