@@ -1,4 +1,6 @@
 # Feu Analytics
+## Demo
+[Demo here](http://www.krlx.fr/feu-analytics/index.html)
 
 ## Setup
 1. Create a [Firebase](https://firebase.google.com) project
